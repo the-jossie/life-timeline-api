@@ -41,4 +41,17 @@ public class MilestonesController : ControllerBase
 
         return Ok(milestones);
     }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var milestone = await _dbContext.Milestones.FindAsync(id);
+
+        if (milestone == null)
+        {
+            return NotFound(new { message = "Milestone not found." });
+        }
+
+        return Ok(milestone);
+    }
 }
