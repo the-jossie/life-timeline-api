@@ -75,4 +75,20 @@ public class MilestonesController : ControllerBase
 
         return Ok(new { milestone, Message = "Milestone updated successfully." });
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var milestone = await _dbContext.Milestones.FindAsync(id);
+
+        if (milestone == null)
+        {
+            return NotFound(new { message = "Milestone not found." });
+        }
+
+        _dbContext.Milestones.Remove(milestone);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new { Message = "Milestone deleted successfully." });
+    }
 }
