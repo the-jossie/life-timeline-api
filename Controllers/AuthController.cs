@@ -54,7 +54,7 @@ public class AuthController : ControllerBase
         }
 
         var token = jwtService.Generate(user);
-        // Here you would typically generate a JWT token and return it to the client
+
         return Ok(new { message = "Login successful.", token });
     }
 }
