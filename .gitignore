@@ -1,0 +1,46 @@
+# Build results
+bin/
+obj/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# NuGet
+packages/
+*.nupkg
+
+# Entity Framework
+*.dbmdl
+
+# Test Results
+TestResults/
+
+# Publish output
+publish/
+
+# Azure
+.publishsettings
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+
+# User secrets
+secrets.json
+
+# ASP.NET Core user secrets
+**/secrets.json
+
+# App settings for local development
+appsettings.Development.json
+
+# Generated coverage reports
+coverage/
+coverage.xml
