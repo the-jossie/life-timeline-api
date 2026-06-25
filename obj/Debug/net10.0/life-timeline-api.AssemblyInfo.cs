@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("life-timeline-api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d2c2df18436f9a0e046a3e04a1d120a018420afc")]
 [assembly: System.Reflection.AssemblyProductAttribute("life-timeline-api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("life-timeline-api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
