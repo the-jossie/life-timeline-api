@@ -91,4 +91,19 @@ public class MilestonesController : ControllerBase
 
         return Ok(new { Message = "Milestone deleted successfully." });
     }
+
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetStats()
+    {
+        var totalMilestones = await _dbContext.Milestones.CountAsync();
+        var totalMilestonesThisMonth = await _dbContext.Milestones.CountAsync(m => m.Date.Month == DateTime.Now.Month && m.Date.Year == DateTime.Now.Year);
+        var totalMilestonesThisYear = await _dbContext.Milestones.CountAsync(m => m.Date.Year == DateTime.Now.Year);
+
+        return Ok(new
+        {
+            totalMilestones,
+            totalMilestonesThisMonth,
+            totalMilestonesThisYear
+        });
+    }
 }
