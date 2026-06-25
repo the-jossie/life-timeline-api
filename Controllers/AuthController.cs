@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly DBContext _dbContext;
+    private readonly AppDbContext _dbContext;
 
-    public AuthController(DBContext dbContext)
+    public AuthController(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }

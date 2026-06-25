@@ -3,10 +3,10 @@ using LifeTimelineApi.Entities;
 
 namespace LifeTimelineApi.Data;
 
-public class DBContext : DbContext
+public class AppDbContext : DbContext
 {
-    public DBContext(
-        DbContextOptions<DBContext> options
+    public AppDbContext(
+        DbContextOptions<AppDbContext> options
     ) : base(options)
     {
     }
