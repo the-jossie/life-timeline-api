@@ -54,4 +54,25 @@ public class MilestonesController : ControllerBase
 
         return Ok(milestone);
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Edit(int id, [FromBody] EditMilestoneRequest request)
+    {
+        var milestone = await _dbContext.Milestones.FindAsync(id);
+
+        if (milestone == null)
+        {
+            return NotFound(new { message = "Milestone not found." });
+        }
+
+        milestone.Title = request.Title;
+        milestone.Description = request.Description;
+        milestone.Emoji = request.Emoji;
+        milestone.Mood = request.Mood;
+        milestone.Date = request.Date;
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new { milestone, Message = "Milestone updated successfully." });
+    }
 }
