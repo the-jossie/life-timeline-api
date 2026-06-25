@@ -1,6 +1,7 @@
 using LifeTimelineApi.Data;
 using LifeTimelineApi.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/milestones")]
@@ -31,5 +32,13 @@ public class MilestonesController : ControllerBase
         await _dbContext.SaveChangesAsync();
 
         return Ok(new { milestone, Message = "Milestone created successfully." });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var milestones = await _dbContext.Milestones.OrderByDescending(m => m.Date).ToListAsync();
+
+        return Ok(milestones);
     }
 }
