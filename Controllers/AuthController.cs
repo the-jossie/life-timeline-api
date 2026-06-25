@@ -17,20 +17,44 @@ public class AuthController : ControllerBase
     [HttpPost("signup")]
     public async Task<IActionResult> Signup([FromBody] SignupRequest request)
     {
-        if (await _dbContext.Users.AnyAsync(u => u.Email == request.Email))
+        var userExists = await _dbContext.Users.AnyAsync(u => u.Email == request.Email);
+
+        if (userExists)
         {
             return BadRequest(new { message = "Email already exists." });
         }
 
-        var user = new User
+        var newUser = new User
         {
             Email = request.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 
-        _dbContext.Users.Add(user);
+        _dbContext.Users.Add(newUser);
         await _dbContext.SaveChangesAsync();
 
         return Ok(new { message = "User registered successfully." });
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, JwtService jwtService)
+    {
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+
+        if (user == null)
+        {
+            return Unauthorized(new { message = "Invalid email or password." });
+        }
+
+        var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+
+        if (!isPasswordValid)
+        {
+            return Unauthorized(new { message = "Invalid email or password." });
+        }
+
+        var token = jwtService.Generate(user);
+        // Here you would typically generate a JWT token and return it to the client
+        return Ok(new { message = "Login successful.", token });
     }
 }
