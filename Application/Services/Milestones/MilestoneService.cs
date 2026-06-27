@@ -27,44 +27,20 @@ public class MilestoneService : IMilestoneService
         _dbContext.Milestones.Add(milestone);
         await _dbContext.SaveChangesAsync();
 
-        return new MilestoneDto
-        {
-            Id = milestone.Id,
-            Title = milestone.Title,
-            Description = milestone.Description,
-            Emoji = milestone.Emoji,
-            Mood = milestone.Mood,
-            Date = milestone.Date
-        };
+        return ToMilestoneDto(milestone);
     }
 
     public async Task<List<MilestoneDto>> GetAllAsync()
     {
         return await _dbContext.Milestones.OrderByDescending(m => m.Date)
-        .Select(m => new MilestoneDto
-        {
-            Id = m.Id,
-            Title = m.Title,
-            Description = m.Description,
-            Emoji = m.Emoji,
-            Mood = m.Mood,
-            Date = m.Date
-        })
+        .Select(m => ToMilestoneDto(m))
         .ToListAsync();
     }
 
     public async Task<MilestoneDto?> GetByIdAsync(Guid id)
     {
         return await _dbContext.Milestones.Where(m => m.Id == id)
-        .Select(m => new MilestoneDto
-        {
-            Id = m.Id,
-            Title = m.Title,
-            Description = m.Description,
-            Emoji = m.Emoji,
-            Mood = m.Mood,
-            Date = m.Date
-        })
+        .Select(m => ToMilestoneDto(m))
         .FirstOrDefaultAsync();
     }
 
@@ -86,15 +62,7 @@ public class MilestoneService : IMilestoneService
 
         await _dbContext.SaveChangesAsync();
 
-        return new MilestoneDto
-        {
-            Id = milestone.Id,
-            Title = milestone.Title,
-            Description = milestone.Description,
-            Emoji = milestone.Emoji,
-            Mood = milestone.Mood,
-            Date = milestone.Date
-        };
+        return ToMilestoneDto(milestone);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
@@ -123,6 +91,19 @@ public class MilestoneService : IMilestoneService
             TotalMilestones = totalMilestones,
             TotalMilestonesThisMonth = totalMilestonesThisMonth,
             TotalMilestonesThisYear = totalMilestonesThisYear
+        };
+    }
+
+    private static MilestoneDto ToMilestoneDto(Milestone milestone)
+    {
+        return new MilestoneDto
+        {
+            Id = milestone.Id,
+            Title = milestone.Title,
+            Description = milestone.Description,
+            Emoji = milestone.Emoji,
+            Mood = milestone.Mood,
+            Date = milestone.Date
         };
     }
 }
