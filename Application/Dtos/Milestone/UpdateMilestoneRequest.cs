@@ -1,4 +1,4 @@
-public class EditMilestoneRequest
+public class UpdateMilestoneRequest
 {
     public string Title { get; set; } = "";
 

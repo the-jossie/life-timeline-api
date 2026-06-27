@@ -56,7 +56,7 @@ public class MilestonesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Edit(int id, [FromBody] EditMilestoneRequest request)
+    public async Task<IActionResult> Edit(int id, [FromBody] UpdateMilestoneRequest request)
     {
         var milestone = await _dbContext.Milestones.FindAsync(id);
 
