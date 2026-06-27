@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using LifeTimelineApi.Data;
+using LifeTimelineApi.Application.Services.Milestones;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddControllers();
+builder.Services.AddScoped<IMilestoneService, MilestoneService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
