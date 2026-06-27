@@ -1,3 +1,4 @@
+using LifeTimelineApi.Application.Services.Milestones;
 using LifeTimelineApi.Data;
 using LifeTimelineApi.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -7,29 +8,18 @@ using Microsoft.EntityFrameworkCore;
 [Route("api/milestones")]
 public class MilestonesController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IMilestoneService _service;
 
-    public MilestonesController(AppDbContext dbContext)
+    public MilestonesController(IMilestoneService service)
     {
-        _dbContext = dbContext;
+        _service = service;
     }
 
     [HttpPost]
     public async Task<IActionResult> Create(
         CreateMilestoneRequest request)
     {
-        var milestone = new Milestone
-        {
-            Title = request.Title,
-            Description = request.Description,
-            Emoji = request.Emoji,
-            Mood = request.Mood,
-            Date = request.Date
-        };
-
-        _dbContext.Milestones.Add(milestone);
-
-        await _dbContext.SaveChangesAsync();
+        var milestone = await _service.CreateAsync(request);
 
         return Ok(new { milestone, Message = "Milestone created successfully." });
     }
