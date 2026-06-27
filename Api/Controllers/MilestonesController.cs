@@ -1,8 +1,5 @@
 using LifeTimelineApi.Application.Services.Milestones;
-using LifeTimelineApi.Data;
-using LifeTimelineApi.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/milestones")]
