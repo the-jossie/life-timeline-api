@@ -13,7 +13,7 @@ public class MilestoneService : IMilestoneService
         _dbContext = dbContext;
     }
 
-    public async Task<Milestone> CreateAsync(CreateMilestoneRequest request)
+    public async Task<MilestoneDto> CreateAsync(CreateMilestoneRequest request)
     {
         var milestone = new Milestone
         {
@@ -27,18 +27,36 @@ public class MilestoneService : IMilestoneService
         _dbContext.Milestones.Add(milestone);
         await _dbContext.SaveChangesAsync();
 
-        return milestone;
+        return new MilestoneDto
+        {
+            Id = milestone.Id,
+            Title = milestone.Title,
+            Description = milestone.Description,
+            Emoji = milestone.Emoji,
+            Mood = milestone.Mood,
+            Date = milestone.Date
+        };
     }
 
-    public async Task<List<Milestone>> GetAllAsync()
+    public async Task<List<MilestoneDto>> GetAllAsync()
     {
-        return await _dbContext.Milestones.OrderByDescending(m => m.Date).ToListAsync();
+        return await _dbContext.Milestones.OrderByDescending(m => m.Date)
+        .Select(m => new MilestoneDto
+        {
+            Id = m.Id,
+            Title = m.Title,
+            Description = m.Description,
+            Emoji = m.Emoji,
+            Mood = m.Mood,
+            Date = m.Date
+        })
+        .ToListAsync();
     }
 
-    public async Task<Milestone?> GetByIdAsync(Guid id)
+    public async Task<MilestoneDto?> GetByIdAsync(Guid id)
     {
         return await _dbContext.Milestones.Where(m => m.Id == id)
-        .Select(m => new Milestone
+        .Select(m => new MilestoneDto
         {
             Id = m.Id,
             Title = m.Title,
@@ -51,13 +69,13 @@ public class MilestoneService : IMilestoneService
     }
 
 
-    public async Task<bool> UpdateAsync(Guid id, UpdateMilestoneRequest request)
+    public async Task<MilestoneDto?> UpdateAsync(Guid id, UpdateMilestoneRequest request)
     {
         var milestone = await _dbContext.Milestones.FirstOrDefaultAsync(m => m.Id == id);
 
         if (milestone == null)
         {
-            return false;
+            return null;
         }
 
         milestone.Title = request.Title;
@@ -68,7 +86,15 @@ public class MilestoneService : IMilestoneService
 
         await _dbContext.SaveChangesAsync();
 
-        return true;
+        return new MilestoneDto
+        {
+            Id = milestone.Id,
+            Title = milestone.Title,
+            Description = milestone.Description,
+            Emoji = milestone.Emoji,
+            Mood = milestone.Mood,
+            Date = milestone.Date
+        };
     }
 
     public async Task<bool> DeleteAsync(Guid id)

@@ -45,14 +45,14 @@ public class MilestonesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMilestoneRequest request)
     {
-        var updated = await _service.UpdateAsync(id, request);
+        var milestone = await _service.UpdateAsync(id, request);
 
-        if (!updated)
+        if (milestone == null)
         {
             return NotFound(new { message = "Milestone not found." });
         }
 
-        return Ok(new { Message = "Milestone updated successfully." });
+        return Ok(new { milestone, Message = "Milestone updated successfully." });
     }
 
     [HttpDelete("{id}")]
