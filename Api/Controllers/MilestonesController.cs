@@ -27,7 +27,7 @@ public class MilestonesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var milestones = await _dbContext.Milestones.OrderByDescending(m => m.Date).ToListAsync();
+        var milestones = await _service.GetAllAsync();
 
         return Ok(milestones);
     }
