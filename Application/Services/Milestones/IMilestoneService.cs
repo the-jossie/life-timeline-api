@@ -7,6 +7,7 @@ public interface IMilestoneService
     Task<Milestone> CreateAsync(CreateMilestoneRequest request);
     Task<Milestone?> GetByIdAsync(Guid id);
     Task<List<Milestone>> GetAllAsync();
-    Task<Milestone> UpdateAsync(UpdateMilestoneRequest request);
+    Task<bool> UpdateAsync(Guid id, UpdateMilestoneRequest request);
     Task<bool> DeleteAsync(Guid id);
+    Task<MilestoneStatsDto> GetStatsAsync();
 }

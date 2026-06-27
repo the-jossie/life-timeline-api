@@ -37,17 +37,27 @@ public class MilestoneService : IMilestoneService
 
     public async Task<Milestone?> GetByIdAsync(Guid id)
     {
-        return await _dbContext.Milestones.FindAsync(id);
+        return await _dbContext.Milestones.Where(m => m.Id == id)
+        .Select(m => new Milestone
+        {
+            Id = m.Id,
+            Title = m.Title,
+            Description = m.Description,
+            Emoji = m.Emoji,
+            Mood = m.Mood,
+            Date = m.Date
+        })
+        .FirstOrDefaultAsync();
     }
 
 
-    public async Task<Milestone> UpdateAsync(UpdateMilestoneRequest request)
+    public async Task<bool> UpdateAsync(Guid id, UpdateMilestoneRequest request)
     {
-        var milestone = await _dbContext.Milestones.FindAsync(request.Id);
+        var milestone = await _dbContext.Milestones.FirstOrDefaultAsync(m => m.Id == id);
 
         if (milestone == null)
         {
-            throw new KeyNotFoundException("Milestone not found.");
+            return false;
         }
 
         milestone.Title = request.Title;
@@ -58,7 +68,7 @@ public class MilestoneService : IMilestoneService
 
         await _dbContext.SaveChangesAsync();
 
-        return milestone;
+        return true;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
@@ -74,5 +84,19 @@ public class MilestoneService : IMilestoneService
         await _dbContext.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<MilestoneStatsDto> GetStatsAsync()
+    {
+        var totalMilestones = await _dbContext.Milestones.CountAsync();
+        var totalMilestonesThisMonth = await _dbContext.Milestones.CountAsync(m => m.Date.Month == DateTime.Now.Month && m.Date.Year == DateTime.Now.Year);
+        var totalMilestonesThisYear = await _dbContext.Milestones.CountAsync(m => m.Date.Year == DateTime.Now.Year);
+
+        return new MilestoneStatsDto
+        {
+            TotalMilestones = totalMilestones,
+            TotalMilestonesThisMonth = totalMilestonesThisMonth,
+            TotalMilestonesThisYear = totalMilestonesThisYear
+        };
     }
 }

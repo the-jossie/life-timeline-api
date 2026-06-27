@@ -33,9 +33,9 @@ public class MilestonesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(Guid id)
     {
-        var milestone = await _dbContext.Milestones.FindAsync(id);
+        var milestone = await _service.GetByIdAsync(id);
 
         if (milestone == null)
         {
@@ -46,38 +46,29 @@ public class MilestonesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateMilestoneRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMilestoneRequest request)
     {
-        var milestone = await _dbContext.Milestones.FindAsync(id);
+        var updated = await _service.UpdateAsync(id, request);
 
-        if (milestone == null)
+        if (!updated)
         {
             return NotFound(new { message = "Milestone not found." });
         }
 
-        milestone.Title = request.Title;
-        milestone.Description = request.Description;
-        milestone.Emoji = request.Emoji;
-        milestone.Mood = request.Mood;
-        milestone.Date = request.Date;
-
-        await _dbContext.SaveChangesAsync();
-
-        return Ok(new { milestone, Message = "Milestone updated successfully." });
+        return Ok(new { Message = "Milestone updated successfully." });
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        var milestone = await _dbContext.Milestones.FindAsync(id);
+        var milestone = await _service.GetByIdAsync(id);
 
         if (milestone == null)
         {
             return NotFound(new { message = "Milestone not found." });
         }
 
-        _dbContext.Milestones.Remove(milestone);
-        await _dbContext.SaveChangesAsync();
+        await _service.DeleteAsync(id);
 
         return Ok(new { Message = "Milestone deleted successfully." });
     }
@@ -85,15 +76,8 @@ public class MilestonesController : ControllerBase
     [HttpGet("stats")]
     public async Task<IActionResult> GetStats()
     {
-        var totalMilestones = await _dbContext.Milestones.CountAsync();
-        var totalMilestonesThisMonth = await _dbContext.Milestones.CountAsync(m => m.Date.Month == DateTime.Now.Month && m.Date.Year == DateTime.Now.Year);
-        var totalMilestonesThisYear = await _dbContext.Milestones.CountAsync(m => m.Date.Year == DateTime.Now.Year);
+        var stats = await _service.GetStatsAsync();
 
-        return Ok(new
-        {
-            totalMilestones,
-            totalMilestonesThisMonth,
-            totalMilestonesThisYear
-        });
+        return Ok(stats);
     }
 }
