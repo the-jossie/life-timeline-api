@@ -13,9 +13,14 @@ public class CurrentUserService
     {
         get
         {
-            var id = _http.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var id = _http.HttpContext?
+            .User?
+            .FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return Guid.Parse(id!);
+            if (!Guid.TryParse(id, out var userId))
+                throw new UnauthorizedAccessException();
+
+            return userId;
         }
     }
 }
