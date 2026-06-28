@@ -33,6 +33,12 @@ public class MilestoneService : IMilestoneService
         _dbContext.Milestones.Add(milestone);
         await _dbContext.SaveChangesAsync();
 
+        await _cacheService.SetAsync(
+            CacheKeys.MilestonesVersion(_currentUser.UserId),
+            Guid.NewGuid().ToString(),
+            TimeSpan.FromDays(30)
+        );
+
         return ToMilestoneDto(milestone);
     }
 
@@ -132,6 +138,12 @@ public class MilestoneService : IMilestoneService
         milestone.Date = request.Date;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.SetAsync(
+            CacheKeys.MilestonesVersion(_currentUser.UserId),
+            Guid.NewGuid().ToString(),
+            TimeSpan.FromDays(30)
+        );
 
         return ToMilestoneDto(milestone);
     }
