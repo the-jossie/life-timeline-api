@@ -33,7 +33,7 @@ public class MilestoneService : IMilestoneService
         return ToMilestoneDto(milestone);
     }
 
-    public async Task<List<MilestoneDto>> GetAllAsync(MilestoneQuery query, CancellationToken cancellationToken)
+    public async Task<PagedResult<MilestoneDto>> GetAllAsync(MilestoneQuery query, CancellationToken cancellationToken)
     {
         var baseQuery = _dbContext.Milestones
         .AsNoTracking()
@@ -63,10 +63,24 @@ public class MilestoneService : IMilestoneService
                 );
         }
 
-        return await baseQuery
-        .OrderByDescending(m => m.Date)
-        .Select(m => ToMilestoneDto(m))
-        .ToListAsync(cancellationToken);
+        var totalCount = await baseQuery.CountAsync(cancellationToken: cancellationToken);
+
+        var items = await baseQuery
+            .OrderByDescending(m => m.Date)
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .Include(m => m.MilestoneTags)
+            .ThenInclude(mt => mt.Tag)
+            .Select(m => ToMilestoneDto(m))
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<MilestoneDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = query.Page,
+            PageSize = query.PageSize
+        };
     }
 
     public async Task<MilestoneDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
