@@ -4,6 +4,7 @@ using LifeTimelineApi.Application.Services.Milestones;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,9 @@ builder.Services.AddAuthentication(
                 )
         };
 });
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis"))
+);
 
 var app = builder.Build();
 
