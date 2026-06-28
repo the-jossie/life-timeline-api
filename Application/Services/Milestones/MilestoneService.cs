@@ -174,20 +174,27 @@ public class MilestoneService : IMilestoneService
     {
         var now = DateTime.UtcNow;
 
-        var milestones = _dbContext.Milestones
-            .AsNoTracking()
-            .Where(m => m.UserId == _currentUser.UserId);
-
-        var total = await milestones.CountAsync(cancellationToken);
-        var thisMonth = await milestones.CountAsync(m => m.Date.Month == now.Month && m.Date.Year == now.Year, cancellationToken);
-        var thisYear = await milestones.CountAsync(m => m.Date.Year == now.Year, cancellationToken);
-
-        return new MilestoneStatsDto
+        return await _dbContext.Milestones
+        .AsNoTracking()
+        .Where(m => m.UserId == _currentUser.UserId)
+        .GroupBy(_ => 1)
+        .Select(g => new MilestoneStatsDto
         {
-            Total = total,
-            ThisMonth = thisMonth,
-            ThisYear = thisYear
-        };
+            Total = g.Count(),
+
+            ThisMonth = g.Count(m =>
+                m.Date >= new DateTime(now.Year, now.Month, 1) &&
+                m.Date < new DateTime(now.Year, now.Month, 1).AddMonths(1)
+            ),
+
+            ThisYear = g.Count(m =>
+                m.Date >= new DateTime(now.Year, 1, 1) &&
+                m.Date < new DateTime(now.Year + 1, 1, 1)
+            )
+        })
+        .FirstOrDefaultAsync(cancellationToken)
+        ?? new MilestoneStatsDto();
+
     }
 
     private static MilestoneDto ToMilestoneDto(Milestone milestone)
