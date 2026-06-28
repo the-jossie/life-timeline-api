@@ -173,8 +173,13 @@ public class MilestoneService : IMilestoneService
     public async Task<MilestoneStatsDto> GetStatsAsync(CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
+        var cacheKey = $"milestone-stats:{_currentUser.UserId}";
 
-        return await _dbContext.Milestones
+        var cachedResult = await _cacheService.GetAsync<MilestoneStatsDto>(cacheKey);
+        if (cachedResult != null)
+            return cachedResult;
+
+        var result = await _dbContext.Milestones
         .AsNoTracking()
         .Where(m => m.UserId == _currentUser.UserId)
         .GroupBy(_ => 1)
@@ -195,6 +200,9 @@ public class MilestoneService : IMilestoneService
         .FirstOrDefaultAsync(cancellationToken)
         ?? new MilestoneStatsDto();
 
+        await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+        return result;
     }
 
     private static MilestoneDto ToMilestoneDto(Milestone milestone)
