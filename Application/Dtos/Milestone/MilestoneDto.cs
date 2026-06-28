@@ -6,4 +6,5 @@ public class MilestoneDto
     public string Emoji { get; set; } = "";
     public string Mood { get; set; } = "";
     public DateTime Date { get; set; }
+    public List<string> Tags { get; set; } = new();
 }
