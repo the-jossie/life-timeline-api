@@ -8,13 +8,13 @@ public class MilestoneService : IMilestoneService
 {
     private readonly AppDbContext _dbContext;
     private readonly CurrentUserService _currentUser;
-    private readonly CacheService _cache;
+    private readonly CacheService _cacheService;
 
     public MilestoneService(AppDbContext dbContext, CurrentUserService currentUser, CacheService cache)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
-        _cache = cache;
+        _cacheService = cache;
     }
 
     public async Task<MilestoneDto> CreateAsync(CreateMilestoneRequest request)
@@ -40,16 +40,12 @@ public class MilestoneService : IMilestoneService
     {
         var userId = _currentUser.UserId;
 
-        string cacheKey =
-            $"milestones:{userId}:" +
-            $"{query.Year}:" +
-            $"{query.Mood}:" +
-            $"{query.Tag}:" +
-            $"{query.Search}:" +
-            $"{query.Page}:" +
-            $"{query.PageSize}";
+        var cacheVersionKey = CacheKeys.MilestonesVersion(userId);
+        var cacheVersion = await _cacheService.GetAsync<string>(cacheVersionKey) ?? "1";
+        var cacheKey = CacheKeys.Milestones(userId, cacheVersion, query);
 
-        var cachedResult = await _cache.GetAsync<PagedResult<MilestoneDto>>(cacheKey);
+        var cachedResult = await _cacheService.GetAsync<PagedResult<MilestoneDto>>(cacheKey);
+
         if (cachedResult != null)
         {
             return cachedResult;
@@ -104,7 +100,7 @@ public class MilestoneService : IMilestoneService
             PageSize = query.PageSize
         };
 
-        await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+        await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
 
         return result;
     }
@@ -152,6 +148,12 @@ public class MilestoneService : IMilestoneService
 
         _dbContext.Milestones.Remove(milestone);
         await _dbContext.SaveChangesAsync();
+
+        await _cacheService.SetAsync(
+            CacheKeys.MilestonesVersion(_currentUser.UserId),
+            Guid.NewGuid().ToString(),
+            TimeSpan.FromDays(30)
+        );
 
         return true;
     }

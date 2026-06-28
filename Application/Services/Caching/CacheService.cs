@@ -23,4 +23,9 @@ public class CacheService
 
         return JsonSerializer.Deserialize<T>(value.ToString());
     }
+
+    public async Task InvalidateAsync(string key)
+    {
+        await _db.KeyDeleteAsync(key);
+    }
 }
