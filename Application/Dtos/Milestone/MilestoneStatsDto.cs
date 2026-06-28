@@ -1,6 +1,6 @@
 public class MilestoneStatsDto
 {
-    public int TotalMilestones { get; set; }
-    public int TotalMilestonesThisMonth { get; set; }
-    public int TotalMilestonesThisYear { get; set; }
+    public int Total { get; set; }
+    public int ThisMonth { get; set; }
+    public int ThisYear { get; set; }
 }
