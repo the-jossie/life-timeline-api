@@ -48,6 +48,11 @@ builder.Services.AddAuthentication(
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis"))
 );
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
+
 
 var app = builder.Build();
 
@@ -62,5 +67,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseResponseCompression();
 
 app.Run();
