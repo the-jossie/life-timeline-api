@@ -33,11 +33,37 @@ public class MilestoneService : IMilestoneService
         return ToMilestoneDto(milestone);
     }
 
-    public async Task<List<MilestoneDto>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<List<MilestoneDto>> GetAllAsync(MilestoneQuery query, CancellationToken cancellationToken)
     {
-        return await _dbContext.Milestones
+        var baseQuery = _dbContext.Milestones
         .AsNoTracking()
         .Where(m => m.UserId == _currentUser.UserId)
+        .AsQueryable();
+
+        if (query.Year.HasValue)
+        {
+            baseQuery = baseQuery.Where(m => m.Date.Year == query.Year);
+        }
+        if (!string.IsNullOrEmpty(query.Mood))
+        {
+            baseQuery = baseQuery.Where(m => m.Mood == query.Mood);
+        }
+        if (!string.IsNullOrEmpty(query.Tag))
+        {
+            baseQuery = baseQuery
+                .Where(m => m.MilestoneTags
+                    .Any(t => t.Tag.Name == query.Tag)
+                );
+        }
+        if (!string.IsNullOrEmpty(query.Search))
+        {
+            baseQuery = baseQuery
+                .Where(m => m.Title
+                    .Contains(query.Search) || m.Description.Contains(query.Search)
+                );
+        }
+
+        return await baseQuery
         .OrderByDescending(m => m.Date)
         .Select(m => ToMilestoneDto(m))
         .ToListAsync(cancellationToken);

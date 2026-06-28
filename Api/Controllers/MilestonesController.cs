@@ -24,9 +24,10 @@ public class MilestonesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(
+    [FromQuery] MilestoneQuery query, CancellationToken cancellationToken)
     {
-        var milestones = await _service.GetAllAsync(cancellationToken);
+        var milestones = await _service.GetAllAsync(query, cancellationToken);
 
         return Ok(milestones);
     }
