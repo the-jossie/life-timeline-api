@@ -12,10 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddControllers();
-builder.Services.AddScoped<IMilestoneService, MilestoneService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddControllers();
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IMilestoneService, MilestoneService>();
+builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(
