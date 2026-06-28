@@ -24,17 +24,17 @@ public class MilestonesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var milestones = await _service.GetAllAsync();
+        var milestones = await _service.GetAllAsync(cancellationToken);
 
         return Ok(milestones);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var milestone = await _service.GetByIdAsync(id);
+        var milestone = await _service.GetByIdAsync(id, cancellationToken);
 
         if (milestone == null)
         {
@@ -45,9 +45,9 @@ public class MilestonesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMilestoneRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMilestoneRequest request, CancellationToken cancellationToken)
     {
-        var milestone = await _service.UpdateAsync(id, request);
+        var milestone = await _service.UpdateAsync(id, request, cancellationToken);
 
         if (milestone == null)
         {
@@ -58,9 +58,9 @@ public class MilestonesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var milestone = await _service.GetByIdAsync(id);
+        var milestone = await _service.GetByIdAsync(id, cancellationToken);
 
         if (milestone == null)
         {
@@ -73,9 +73,9 @@ public class MilestonesController : ControllerBase
     }
 
     [HttpGet("stats")]
-    public async Task<IActionResult> GetStats()
+    public async Task<IActionResult> GetStats(CancellationToken cancellationToken)
     {
-        var stats = await _service.GetStatsAsync();
+        var stats = await _service.GetStatsAsync(cancellationToken);
 
         return Ok(stats);
     }

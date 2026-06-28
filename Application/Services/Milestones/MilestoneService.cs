@@ -33,27 +33,27 @@ public class MilestoneService : IMilestoneService
         return ToMilestoneDto(milestone);
     }
 
-    public async Task<List<MilestoneDto>> GetAllAsync()
+    public async Task<List<MilestoneDto>> GetAllAsync(CancellationToken cancellationToken)
     {
         return await _dbContext.Milestones
         .AsNoTracking()
         .Where(m => m.UserId == _currentUser.UserId)
         .OrderByDescending(m => m.Date)
         .Select(m => ToMilestoneDto(m))
-        .ToListAsync();
+        .ToListAsync(cancellationToken);
     }
 
-    public async Task<MilestoneDto?> GetByIdAsync(Guid id)
+    public async Task<MilestoneDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _dbContext.Milestones
             .AsNoTracking()
             .Where(m => m.Id == id && m.UserId == _currentUser.UserId)
             .Select(m => ToMilestoneDto(m))
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
 
-    public async Task<MilestoneDto?> UpdateAsync(Guid id, UpdateMilestoneRequest request)
+    public async Task<MilestoneDto?> UpdateAsync(Guid id, UpdateMilestoneRequest request, CancellationToken cancellationToken)
     {
         var milestone = await _dbContext.Milestones
             .FirstOrDefaultAsync(m => m.Id == id && m.UserId == _currentUser.UserId);
@@ -69,7 +69,7 @@ public class MilestoneService : IMilestoneService
         milestone.Mood = request.Mood;
         milestone.Date = request.Date;
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return ToMilestoneDto(milestone);
     }
@@ -90,7 +90,7 @@ public class MilestoneService : IMilestoneService
         return true;
     }
 
-    public async Task<MilestoneStatsDto> GetStatsAsync()
+    public async Task<MilestoneStatsDto> GetStatsAsync(CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
 
@@ -98,9 +98,9 @@ public class MilestoneService : IMilestoneService
             .AsNoTracking()
             .Where(m => m.UserId == _currentUser.UserId);
 
-        var total = await milestones.CountAsync();
-        var thisMonth = await milestones.CountAsync(m => m.Date.Month == now.Month && m.Date.Year == now.Year);
-        var thisYear = await milestones.CountAsync(m => m.Date.Year == now.Year);
+        var total = await milestones.CountAsync(cancellationToken);
+        var thisMonth = await milestones.CountAsync(m => m.Date.Month == now.Month && m.Date.Year == now.Year, cancellationToken);
+        var thisYear = await milestones.CountAsync(m => m.Date.Year == now.Year, cancellationToken);
 
         return new MilestoneStatsDto
         {
