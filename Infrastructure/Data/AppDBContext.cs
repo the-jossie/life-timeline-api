@@ -38,6 +38,28 @@ public class AppDbContext : DbContext
             .HasOne(x => x.Tag)
             .WithMany(x => x.MilestoneTags)
             .HasForeignKey(x => x.TagId);
+
+        modelBuilder.Entity<Milestone>()
+        .HasIndex(m => m.UserId);
+
+        modelBuilder.Entity<Milestone>()
+            .HasIndex(m => m.Date);
+
+        modelBuilder.Entity<Milestone>()
+            .HasIndex(m => m.Title);
+
+        modelBuilder.Entity<Milestone>()
+            .HasIndex(m => m.Description);
+
+        modelBuilder.Entity<Milestone>()
+            .HasIndex(m => m.Mood);
+
+        modelBuilder.Entity<Tag>()
+            .HasIndex(t => t.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<MilestoneTag>()
+            .HasIndex(mt => new { mt.MilestoneId, mt.TagId });
     }
 
 }
