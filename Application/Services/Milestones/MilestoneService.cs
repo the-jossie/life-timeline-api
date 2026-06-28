@@ -8,10 +8,13 @@ public class MilestoneService : IMilestoneService
 {
     private readonly AppDbContext _dbContext;
     private readonly CurrentUserService _currentUser;
-    public MilestoneService(AppDbContext dbContext, CurrentUserService currentUser)
+    private readonly CacheService _cache;
+
+    public MilestoneService(AppDbContext dbContext, CurrentUserService currentUser, CacheService cache)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
+        _cache = cache;
     }
 
     public async Task<MilestoneDto> CreateAsync(CreateMilestoneRequest request)
@@ -35,52 +38,75 @@ public class MilestoneService : IMilestoneService
 
     public async Task<PagedResult<MilestoneDto>> GetAllAsync(MilestoneQuery query, CancellationToken cancellationToken)
     {
+        var userId = _currentUser.UserId;
+
+        string cacheKey =
+            $"milestones:{userId}:" +
+            $"{query.Year}:" +
+            $"{query.Mood}:" +
+            $"{query.Tag}:" +
+            $"{query.Search}:" +
+            $"{query.Page}:" +
+            $"{query.PageSize}";
+
+        var cachedResult = await _cache.GetAsync<PagedResult<MilestoneDto>>(cacheKey);
+        if (cachedResult != null)
+        {
+            return cachedResult;
+        }
+
         var baseQuery = _dbContext.Milestones
-        .AsNoTracking()
-        .Where(m => m.UserId == _currentUser.UserId)
-        .AsQueryable();
+            .AsNoTracking()
+            .Where(m => m.UserId == userId);
 
         if (query.Year.HasValue)
         {
-            baseQuery = baseQuery.Where(m => m.Date.Year == query.Year);
+            baseQuery = baseQuery.Where(m => m.Date.Year == query.Year.Value);
         }
-        if (!string.IsNullOrEmpty(query.Mood))
+        if (!string.IsNullOrWhiteSpace(query.Mood))
         {
             baseQuery = baseQuery.Where(m => m.Mood == query.Mood);
         }
-        if (!string.IsNullOrEmpty(query.Tag))
+        if (!string.IsNullOrWhiteSpace(query.Tag))
         {
             baseQuery = baseQuery
                 .Where(m => m.MilestoneTags
                     .Any(t => t.Tag.Name == query.Tag)
                 );
         }
-        if (!string.IsNullOrEmpty(query.Search))
+        if (!string.IsNullOrWhiteSpace(query.Search))
         {
+            var search = query.Search.Trim();
+
             baseQuery = baseQuery
                 .Where(m => m.Title
-                    .Contains(query.Search) || m.Description.Contains(query.Search)
+                    .Contains(search) || m.Description.Contains(search)
                 );
         }
 
         var totalCount = await baseQuery.CountAsync(cancellationToken: cancellationToken);
 
-        var items = await baseQuery
+        var data = await baseQuery
             .OrderByDescending(m => m.Date)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
             .Include(m => m.MilestoneTags)
             .ThenInclude(mt => mt.Tag)
-            .Select(m => ToMilestoneDto(m))
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<MilestoneDto>
+        var items = data.Select(ToMilestoneDto).ToList();
+
+        var result = new PagedResult<MilestoneDto>
         {
             Items = items,
             TotalCount = totalCount,
             Page = query.Page,
             PageSize = query.PageSize
         };
+
+        await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+        return result;
     }
 
     public async Task<MilestoneDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
