@@ -18,6 +18,7 @@ public class MilestoneService : IMilestoneService
     {
         var milestone = new Milestone
         {
+            Id = Guid.NewGuid(),
             Title = request.Title,
             Description = request.Description,
             Emoji = request.Emoji,
