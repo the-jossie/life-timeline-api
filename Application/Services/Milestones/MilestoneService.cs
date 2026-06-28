@@ -91,6 +91,7 @@ public class MilestoneService : IMilestoneService
 
     public async Task<MilestoneStatsDto> GetStatsAsync()
     {
+        var now = DateTime.UtcNow;
         var totalMilestones = await _dbContext.Milestones
         .AsNoTracking()
             .Where(m =>
@@ -99,11 +100,11 @@ public class MilestoneService : IMilestoneService
         var totalMilestonesThisMonth = await _dbContext.Milestones
             .AsNoTracking()
             .Where(m => m.UserId == _currentUser.UserId)
-            .CountAsync(m => m.Date.Month == DateTime.Now.Month && m.Date.Year == DateTime.Now.Year);
+            .CountAsync(m => m.Date.Month == now.Month && m.Date.Year == now.Year);
         var totalMilestonesThisYear = await _dbContext.Milestones
             .AsNoTracking()
             .Where(m => m.UserId == _currentUser.UserId)
-            .CountAsync(m => m.Date.Year == DateTime.Now.Year);
+            .CountAsync(m => m.Date.Year == now.Year);
 
         return new MilestoneStatsDto
         {
