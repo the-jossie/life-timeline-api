@@ -10,4 +10,6 @@ public class Milestone
     public DateTime Date { get; set; }
     public Guid UserId { get; set; }
     public User User { get; set; } = null!;
+    public ICollection<MilestoneTag> MilestoneTags { get; set; }
+        = new List<MilestoneTag>();
 }
