@@ -1,6 +1,8 @@
 using LifeTimelineApi.Application.Services.Milestones;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize]
 [ApiController]
 [Route("api/milestones")]
 public class MilestonesController : ControllerBase
