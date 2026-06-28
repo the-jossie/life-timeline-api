@@ -9,4 +9,9 @@ public static class CacheKeys
     {
         return $"milestones:version:{userId}";
     }
+
+    public static string MilestoneStats(Guid userId)
+    {
+        return $"milestone-stats:{userId}";
+    }
 }

@@ -38,6 +38,11 @@ public class MilestoneService : IMilestoneService
             Guid.NewGuid().ToString(),
             TimeSpan.FromDays(30)
         );
+        await _cacheService.SetAsync(
+            CacheKeys.MilestoneStats(_currentUser.UserId),
+            Guid.NewGuid().ToString(),
+            TimeSpan.FromDays(30)
+        );
 
         return ToMilestoneDto(milestone);
     }
@@ -166,6 +171,11 @@ public class MilestoneService : IMilestoneService
             Guid.NewGuid().ToString(),
             TimeSpan.FromDays(30)
         );
+        await _cacheService.SetAsync(
+            CacheKeys.MilestoneStats(_currentUser.UserId),
+            Guid.NewGuid().ToString(),
+            TimeSpan.FromDays(30)
+        );
 
         return true;
     }
@@ -173,7 +183,7 @@ public class MilestoneService : IMilestoneService
     public async Task<MilestoneStatsDto> GetStatsAsync(CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
-        var cacheKey = $"milestone-stats:{_currentUser.UserId}";
+        var cacheKey = CacheKeys.MilestoneStats(_currentUser.UserId);
 
         var cachedResult = await _cacheService.GetAsync<MilestoneStatsDto>(cacheKey);
         if (cachedResult != null)
