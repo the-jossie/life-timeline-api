@@ -35,6 +35,7 @@ public class MilestoneService : IMilestoneService
     public async Task<List<MilestoneDto>> GetAllAsync()
     {
         return await _dbContext.Milestones
+        .AsNoTracking()
         .Where(m => m.UserId == _currentUser.UserId)
         .OrderByDescending(m => m.Date)
         .Select(m => ToMilestoneDto(m))
@@ -44,6 +45,7 @@ public class MilestoneService : IMilestoneService
     public async Task<MilestoneDto?> GetByIdAsync(Guid id)
     {
         return await _dbContext.Milestones
+            .AsNoTracking()
             .Where(m => m.Id == id && m.UserId == _currentUser.UserId)
             .Select(m => ToMilestoneDto(m))
             .FirstOrDefaultAsync();
@@ -90,13 +92,16 @@ public class MilestoneService : IMilestoneService
     public async Task<MilestoneStatsDto> GetStatsAsync()
     {
         var totalMilestones = await _dbContext.Milestones
+        .AsNoTracking()
             .Where(m =>
                 m.UserId == _currentUser.UserId)
             .CountAsync();
         var totalMilestonesThisMonth = await _dbContext.Milestones
+            .AsNoTracking()
             .Where(m => m.UserId == _currentUser.UserId)
             .CountAsync(m => m.Date.Month == DateTime.Now.Month && m.Date.Year == DateTime.Now.Year);
         var totalMilestonesThisYear = await _dbContext.Milestones
+            .AsNoTracking()
             .Where(m => m.UserId == _currentUser.UserId)
             .CountAsync(m => m.Date.Year == DateTime.Now.Year);
 
