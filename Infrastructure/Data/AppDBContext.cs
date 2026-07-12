@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<Tag> Tags => Set<Tag>();
 
     public DbSet<MilestoneTag> MilestoneTags => Set<MilestoneTag>();
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
