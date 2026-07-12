@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StackExchange.Redis;
+using LifeTimelineApi.Services.Background;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddScoped<IMilestoneService, MilestoneService>();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddSingleton<CacheService>();
 builder.Services.AddScoped<RefreshTokenService>();
+builder.Services.AddHostedService<RefreshTokenCleanupService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(
