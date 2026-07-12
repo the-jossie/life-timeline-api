@@ -65,6 +65,35 @@ namespace life_timeline_api.Migrations
                     b.ToTable("Milestones");
                 });
 
+            modelBuilder.Entity("LifeTimelineApi.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("LifeTimelineApi.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -85,32 +114,6 @@ namespace life_timeline_api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("LifeTimelineApi.Models.RefreshToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRevoked")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("MilestoneTag", b =>
@@ -159,7 +162,7 @@ namespace life_timeline_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("LifeTimelineApi.Models.RefreshToken", b =>
+            modelBuilder.Entity("LifeTimelineApi.Entities.RefreshToken", b =>
                 {
                     b.HasOne("LifeTimelineApi.Entities.User", "User")
                         .WithMany("RefreshTokens")

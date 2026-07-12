@@ -59,23 +59,32 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid email or password." });
         }
 
-        var token = _jwtService.Generate(user);
         var accessToken = _jwtService.Generate(user);
 
 
-        var refreshToken = new RefreshToken
+        var refreshToken =
+            _refreshTokenService.Generate();
+
+
+        var refreshTokenHash =
+            _refreshTokenService.Hash(refreshToken);
+
+
+        var refreshTokenEntity = new RefreshToken
         {
             Id = Guid.NewGuid(),
 
-            Token = _refreshTokenService.Generate(),
+            UserId = user.Id,
 
-            ExpiresAt = _refreshTokenService.GetExpiryDate(),
+            TokenHash = refreshTokenHash,
 
-            UserId = user.Id
+            CreatedAt = DateTime.UtcNow,
+
+            ExpiresAt = DateTime.UtcNow.AddDays(30)
         };
 
 
-        _dbContext.RefreshTokens.Add(refreshToken);
+        _dbContext.RefreshTokens.Add(refreshTokenEntity);
 
         await _dbContext.SaveChangesAsync();
 
@@ -85,73 +94,67 @@ public class AuthController : ControllerBase
         {
             Message = "Login successful.",
             AccessToken = accessToken,
-            RefreshToken = refreshToken.Token
+            RefreshToken = refreshToken
         });
     }
 
     [HttpPost("refresh")]
-public async Task<IActionResult> Refresh(
-    RefreshRequest request)
-{
-
-    var storedToken =
-        await _dbContext.RefreshTokens
-        .Include(x => x.User)
-        .FirstOrDefaultAsync(
-            x => x.Token == request.RefreshToken
-        );
-
-
-    if (storedToken == null)
+    public async Task<IActionResult> Refresh(
+      RefreshTokenRequest request,
+      JwtService jwtService,
+      RefreshTokenService refreshTokenService)
     {
-        return Unauthorized();
+        var tokenHash =
+            refreshTokenService.Hash(request.RefreshToken);
+
+        var storedToken =
+            await _dbContext.RefreshTokens
+            .Include(x => x.User)
+            .FirstOrDefaultAsync(
+                x => x.TokenHash == tokenHash
+            );
+
+        if (storedToken == null ||
+            !storedToken.IsActive)
+        {
+            return Unauthorized(new
+            {
+                message = "Invalid refresh token"
+            });
+        }
+
+        // rotate token
+        storedToken.RevokedAt =
+            DateTime.UtcNow;
+        var newRefreshToken =
+            refreshTokenService.Generate();
+        var newHash =
+            refreshTokenService.Hash(newRefreshToken);
+
+        _dbContext.RefreshTokens.Add(
+            new RefreshToken
+            {
+                Id = Guid.NewGuid(),
+
+                UserId = storedToken.UserId,
+
+                TokenHash = newHash,
+
+                CreatedAt = DateTime.UtcNow,
+
+                ExpiresAt =
+                    DateTime.UtcNow.AddDays(30)
+            });
+
+        var newAccessToken =
+            jwtService.Generate(storedToken.User);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new
+        {
+            accessToken = newAccessToken,
+
+            refreshToken = newRefreshToken
+        });
     }
-
-
-    if (storedToken.IsRevoked)
-    {
-        return Unauthorized();
-    }
-
-
-    if (storedToken.ExpiresAt < DateTime.UtcNow)
-    {
-        return Unauthorized();
-    }
-
-
-    var newAccessToken =
-        _jwtService.Generate(storedToken.User);
-
-
-    var newRefreshToken = new RefreshToken
-    {
-        Id = Guid.NewGuid(),
-
-        Token = _refreshTokenService.Generate(),
-
-        ExpiresAt =
-            _refreshTokenService.GetExpiryDate(),
-
-        UserId = storedToken.UserId
-    };
-
-
-    storedToken.IsRevoked = true;
-
-
-    _dbContext.RefreshTokens.Add(newRefreshToken);
-
-
-    await _dbContext.SaveChangesAsync();
-
-
-    return Ok(new
-    {
-        accessToken = newAccessToken,
-
-        refreshToken = newRefreshToken.Token
-    });
-
-}
 }
