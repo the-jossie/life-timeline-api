@@ -19,6 +19,7 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IMilestoneService, MilestoneService>();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddSingleton<CacheService>();
+builder.Services.AddScoped<RefreshTokenService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(
