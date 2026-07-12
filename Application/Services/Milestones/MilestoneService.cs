@@ -26,6 +26,7 @@ public class MilestoneService : IMilestoneService
             Description = request.Description,
             Emoji = request.Emoji,
             Mood = request.Mood,
+            MilestoneTags = request.Tags.Select(tag => new MilestoneTag { Tag = new Tag { Name = tag } }).ToList(),
             Date = request.Date,
             UserId = _currentUser.UserId
         };
@@ -141,6 +142,7 @@ public class MilestoneService : IMilestoneService
         milestone.Emoji = request.Emoji;
         milestone.Mood = request.Mood;
         milestone.Date = request.Date;
+        milestone.MilestoneTags = request.Tags.Select(tag => new MilestoneTag { Tag = new Tag { Name = tag } }).ToList();
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -224,7 +226,8 @@ public class MilestoneService : IMilestoneService
             Description = milestone.Description,
             Emoji = milestone.Emoji,
             Mood = milestone.Mood,
-            Date = milestone.Date
+            Date = milestone.Date,
+            Tags = milestone.MilestoneTags.Select(mt => mt.Tag.Name).ToList()
         };
     }
 }
