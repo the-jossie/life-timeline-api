@@ -61,6 +61,13 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<MilestoneTag>()
             .HasIndex(mt => new { mt.MilestoneId, mt.TagId });
+
+
+    modelBuilder.Entity<RefreshToken>()
+        .HasOne(x => x.User)
+        .WithMany(x => x.RefreshTokens)
+        .HasForeignKey(x => x.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
     }
 
 }
