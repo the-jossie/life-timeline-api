@@ -46,8 +46,17 @@ builder.Services.AddAuthentication(
                 )
         };
 });
+var redisConnection = builder.Configuration.GetConnectionString("Redis");
+
+if (string.IsNullOrEmpty(redisConnection))
+{
+    throw new InvalidOperationException(
+        "Redis connection string is missing."
+    );
+}
+
 builder.Services.AddSingleton<IConnectionMultiplexer>(
-    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis"))
+    ConnectionMultiplexer.Connect(redisConnection)
 );
 
 builder.Services.AddSwaggerGen(options =>
@@ -60,7 +69,7 @@ builder.Services.AddSwaggerGen(options =>
             Scheme = "Bearer",
             BearerFormat = "JWT",
             In = ParameterLocation.Header,
-            Description = "Enter JWT token like: Bearer {token}"
+            Description = "Enter JWT token"
         });
 
     options.AddSecurityRequirement(
