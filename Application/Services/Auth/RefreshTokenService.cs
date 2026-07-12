@@ -1,23 +1,24 @@
 using System.Security.Cryptography;
+using System.Text;
 
 public class RefreshTokenService
 {
-
     public string Generate()
     {
-        var randomBytes = new byte[64];
-
-        using var generator = RandomNumberGenerator.Create();
-
-        generator.GetBytes(randomBytes);
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
 
         return Convert.ToBase64String(randomBytes);
     }
 
 
-    public DateTime GetExpiryDate()
+    public string Hash(string token)
     {
-        return DateTime.UtcNow.AddDays(30);
-    }
+        using var sha256 = SHA256.Create();
 
+        var bytes = Encoding.UTF8.GetBytes(token);
+
+        var hash = sha256.ComputeHash(bytes);
+
+        return Convert.ToBase64String(hash);
+    }
 }
